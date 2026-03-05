@@ -113,18 +113,18 @@ export default function TransactionList({
             {selectedCategories.length === 0 ? 'All Categories' : `${selectedCategories.length} categories`}
             <span className="text-[10px]">▼</span>
           </button>
-          {catOpen && <div className="absolute top-full left-0 mt-1 bg-neutral-700 rounded-lg shadow-xl z-50 min-w-[180px] max-h-64 overflow-y-auto py-1">
+          {catOpen && <div className="absolute top-full left-0 mt-1 bg-[#4a4a4a] rounded-md shadow-2xl z-50 py-1 whitespace-nowrap">
             <label
-              className="flex items-center gap-2 px-3 py-1.5 hover:bg-blue-500 cursor-pointer text-sm text-white"
+              className={`flex items-center gap-2 px-3 py-1 cursor-pointer text-[13px] text-white ${selectedCategories.length === 0 ? 'bg-blue-500' : 'hover:bg-blue-500'}`}
               onClick={() => setSelectedCategories([])}
             >
-              <span>{selectedCategories.length === 0 ? '✓' : '\u00A0\u00A0'}</span>
+              <span className="w-4">{selectedCategories.length === 0 ? '✓' : ''}</span>
               Select All
             </label>
             {categories.map((cat) => (
               <label
                 key={cat}
-                className="flex items-center gap-2 px-3 py-1.5 hover:bg-blue-500 cursor-pointer text-sm text-white"
+                className={`flex items-center gap-2 px-3 py-1 cursor-pointer text-[13px] text-white ${(selectedCategories.length === 0 || selectedCategories.includes(cat)) ? 'hover:bg-blue-500' : 'hover:bg-blue-500'}`}
                 onClick={(e) => {
                   e.preventDefault();
                   if (selectedCategories.length === 0) {
@@ -137,7 +137,7 @@ export default function TransactionList({
                   }
                 }}
               >
-                <span>{(selectedCategories.length === 0 || selectedCategories.includes(cat)) ? '✓' : '\u00A0\u00A0'}</span>
+                <span className="w-4">{(selectedCategories.length === 0 || selectedCategories.includes(cat)) ? '✓' : ''}</span>
                 {cat}
               </label>
             ))}
@@ -154,18 +154,18 @@ export default function TransactionList({
             {selectedAccounts.length === 0 ? 'All Accounts' : `${selectedAccounts.length} accounts`}
             <span className="text-[10px]">▼</span>
           </button>
-          {accOpen && <div className="absolute top-full left-0 mt-1 bg-neutral-700 rounded-lg shadow-xl z-50 min-w-[180px] max-h-64 overflow-y-auto py-1">
+          {accOpen && <div className="absolute top-full left-0 mt-1 bg-[#4a4a4a] rounded-md shadow-2xl z-50 py-1 whitespace-nowrap">
             <label
-              className="flex items-center gap-2 px-3 py-1.5 hover:bg-blue-500 cursor-pointer text-sm text-white"
+              className={`flex items-center gap-2 px-3 py-1 cursor-pointer text-[13px] text-white ${selectedAccounts.length === 0 ? 'bg-blue-500' : 'hover:bg-blue-500'}`}
               onClick={() => setSelectedAccounts([])}
             >
-              <span>{selectedAccounts.length === 0 ? '✓' : '\u00A0\u00A0'}</span>
+              <span className="w-4">{selectedAccounts.length === 0 ? '✓' : ''}</span>
               Select All
             </label>
             {accounts.map((acc) => (
               <label
                 key={acc}
-                className="flex items-center gap-2 px-3 py-1.5 hover:bg-blue-500 cursor-pointer text-sm text-white"
+                className={`flex items-center gap-2 px-3 py-1 cursor-pointer text-[13px] text-white hover:bg-blue-500`}
                 onClick={(e) => {
                   e.preventDefault();
                   if (selectedAccounts.length === 0) {
@@ -178,7 +178,7 @@ export default function TransactionList({
                   }
                 }}
               >
-                <span>{(selectedAccounts.length === 0 || selectedAccounts.includes(acc)) ? '✓' : '\u00A0\u00A0'}</span>
+                <span className="w-4">{(selectedAccounts.length === 0 || selectedAccounts.includes(acc)) ? '✓' : ''}</span>
                 {acc}
               </label>
             ))}
