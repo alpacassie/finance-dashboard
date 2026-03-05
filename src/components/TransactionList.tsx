@@ -29,6 +29,24 @@ export default function TransactionList({
   const [typeFilter, setTypeFilter] = useState<string>(defaultTypeFilter);
   const [sortColumn, setSortColumn] = useState<'date' | 'merchant' | 'category' | 'amount'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+
+  const toggleCategory = (cat: string) => {
+    if (selectedCategories.includes(cat)) {
+      setSelectedCategories(selectedCategories.filter(c => c !== cat));
+    } else {
+      setSelectedCategories([...selectedCategories, cat]);
+    }
+  };
+
+  const toggleAccount = (acc: string) => {
+    if (selectedAccounts.includes(acc)) {
+      setSelectedAccounts(selectedAccounts.filter(a => a !== acc));
+    } else {
+      setSelectedAccounts([...selectedAccounts, acc]);
+    }
+  };
 
   useEffect(() => {
     setTypeFilter(defaultTypeFilter);
@@ -100,38 +118,66 @@ export default function TransactionList({
         {title}
       </h2>
 
-      <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto">
-        <select
-          multiple
-          value={selectedCategories}
-          onChange={(e) => {
-            const values = Array.from(e.target.selectedOptions, (opt) => opt.value);
-            setSelectedCategories(values);
-          }}
-          className="text-xs border border-neutral-200 px-2 py-1 bg-white min-w-[100px] h-[60px]"
-        >
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+      <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto items-start">
+        <div className="relative">
+          <div
+            onClick={() => setCategoryOpen(!categoryOpen)}
+            className="text-xs border border-neutral-200 px-2 py-1 bg-white cursor-pointer flex items-center gap-1 select-none"
+          >
+            {selectedCategories.length === 0 ? 'All Categories' : `${selectedCategories.length} selected`}
+            <span className="text-[10px]">▼</span>
+          </div>
+          {categoryOpen && (
+            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 max-h-48 overflow-y-auto min-w-[140px]">
+              <div
+                onClick={() => setSelectedCategories([])}
+                className="px-2 py-1 hover:bg-neutral-100 cursor-pointer text-xs border-b border-neutral-100 font-medium"
+              >
+                ✓ All Categories
+              </div>
+              {categories.map((cat) => (
+                <div
+                  key={cat}
+                  onClick={() => toggleCategory(cat)}
+                  className="px-2 py-1 hover:bg-neutral-100 cursor-pointer text-xs flex items-center gap-2"
+                >
+                  <span>{selectedCategories.includes(cat) ? '☑' : '☐'}</span>
+                  {cat}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-        <select
-          multiple
-          value={selectedAccounts}
-          onChange={(e) => {
-            const values = Array.from(e.target.selectedOptions, (opt) => opt.value);
-            setSelectedAccounts(values);
-          }}
-          className="text-xs border border-neutral-200 px-2 py-1 bg-white min-w-[120px] h-[60px]"
-        >
-          {accounts.map((acc) => (
-            <option key={acc} value={acc}>
-              {acc}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <div
+            onClick={() => setAccountOpen(!accountOpen)}
+            className="text-xs border border-neutral-200 px-2 py-1 bg-white cursor-pointer flex items-center gap-1 select-none"
+          >
+            {selectedAccounts.length === 0 ? 'All Accounts' : `${selectedAccounts.length} selected`}
+            <span className="text-[10px]">▼</span>
+          </div>
+          {accountOpen && (
+            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 max-h-48 overflow-y-auto min-w-[140px]">
+              <div
+                onClick={() => setSelectedAccounts([])}
+                className="px-2 py-1 hover:bg-neutral-100 cursor-pointer text-xs border-b border-neutral-100 font-medium"
+              >
+                ✓ All Accounts
+              </div>
+              {accounts.map((acc) => (
+                <div
+                  key={acc}
+                  onClick={() => toggleAccount(acc)}
+                  className="px-2 py-1 hover:bg-neutral-100 cursor-pointer text-xs flex items-center gap-2"
+                >
+                  <span>{selectedAccounts.includes(acc) ? '☑' : '☐'}</span>
+                  {acc}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <select
           value={recurringFilter}
