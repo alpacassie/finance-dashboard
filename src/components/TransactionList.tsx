@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Transaction } from '@/lib/supabase';
 
 interface TransactionListProps {
@@ -31,10 +31,37 @@ export default function TransactionList({
   const [typeFilter, setTypeFilter] = useState<string>(defaultTypeFilter);
   const [sortColumn, setSortColumn] = useState<'date' | 'merchant' | 'category' | 'amount'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [columnWidths, setColumnWidths] = useState({ date: 60, merchant: 140, category: 100, amount: 80 });
+  const resizingRef = useRef<{ column: string; startX: number; startWidth: number } | null>(null);
 
   useEffect(() => {
     setTypeFilter(defaultTypeFilter);
   }, [defaultTypeFilter]);
+
+  const handleResizeStart = useCallback((e: React.MouseEvent, column: string) => {
+    e.preventDefault();
+    resizingRef.current = {
+      column,
+      startX: e.clientX,
+      startWidth: columnWidths[column as keyof typeof columnWidths],
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!resizingRef.current) return;
+      const diff = e.clientX - resizingRef.current.startX;
+      const newWidth = Math.max(40, resizingRef.current.startWidth + diff);
+      setColumnWidths((prev) => ({ ...prev, [resizingRef.current!.column]: newWidth }));
+    };
+
+    const handleMouseUp = () => {
+      resizingRef.current = null;
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [columnWidths]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -97,7 +124,7 @@ export default function TransactionList({
   }, [filteredTransactions]);
 
   return (
-    <div className="border border-neutral-200 p-4 max-w-[480px]">
+    <div className="border border-neutral-200 p-4">
       <h2 className="text-xs text-neutral-500 uppercase tracking-wide mb-4">
         {title}
       </h2>
@@ -179,32 +206,47 @@ export default function TransactionList({
       </div>
 
       <div className="max-h-[360px] overflow-y-auto">
-        <table className="w-full text-xs table-fixed">
+        <table className="text-xs table-fixed" style={{ width: columnWidths.date + columnWidths.merchant + columnWidths.category + columnWidths.amount + 12 }}>
           <colgroup>
-            <col className="w-[60px]" />
-            <col className="w-[120px]" />
-            <col className="w-[90px]" />
-            <col className="w-[70px]" />
+            <col style={{ width: columnWidths.date }} />
+            <col style={{ width: columnWidths.merchant }} />
+            <col style={{ width: columnWidths.category }} />
+            <col style={{ width: columnWidths.amount }} />
           </colgroup>
           <thead className="sticky top-0 bg-white">
             <tr className="border-b border-neutral-200">
               <th
-                className="text-left py-2 font-medium text-neutral-500 cursor-pointer hover:text-neutral-700"
-                onClick={() => handleSort('date')}
+                className="text-left py-2 font-medium text-neutral-500 relative"
               >
-                Date {sortColumn === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                <span className="cursor-pointer hover:text-neutral-700" onClick={() => handleSort('date')}>
+                  Date {sortColumn === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </span>
+                <div
+                  className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-neutral-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'date')}
+                />
               </th>
               <th
-                className="text-left py-2 font-medium text-neutral-500 cursor-pointer hover:text-neutral-700"
-                onClick={() => handleSort('merchant')}
+                className="text-left py-2 font-medium text-neutral-500 relative"
               >
-                Merchant {sortColumn === 'merchant' && (sortDirection === 'asc' ? '↑' : '↓')}
+                <span className="cursor-pointer hover:text-neutral-700" onClick={() => handleSort('merchant')}>
+                  Merchant {sortColumn === 'merchant' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </span>
+                <div
+                  className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-neutral-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'merchant')}
+                />
               </th>
               <th
-                className="text-left py-2 font-medium text-neutral-500 cursor-pointer hover:text-neutral-700"
-                onClick={() => handleSort('category')}
+                className="text-left py-2 font-medium text-neutral-500 relative"
               >
-                Category {sortColumn === 'category' && (sortDirection === 'asc' ? '↑' : '↓')}
+                <span className="cursor-pointer hover:text-neutral-700" onClick={() => handleSort('category')}>
+                  Category {sortColumn === 'category' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </span>
+                <div
+                  className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-neutral-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'category')}
+                />
               </th>
               <th
                 className="text-right py-2 font-medium text-neutral-500 cursor-pointer hover:text-neutral-700"
