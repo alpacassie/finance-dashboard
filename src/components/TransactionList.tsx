@@ -105,6 +105,7 @@ export default function TransactionList({
       <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto">
         <div className="relative">
           <button
+            type="button"
             onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
             className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
           >
@@ -160,6 +161,7 @@ export default function TransactionList({
 
         <div className="relative">
           <button
+            type="button"
             onClick={() => setShowAccountDropdown(!showAccountDropdown)}
             className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
           >
