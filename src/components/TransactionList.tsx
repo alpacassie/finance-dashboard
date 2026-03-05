@@ -24,13 +24,13 @@ export default function TransactionList({
 }: TransactionListProps) {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
-  const [excludedCategories, setExcludedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [recurringFilter, setRecurringFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>(defaultTypeFilter);
   const [sortColumn, setSortColumn] = useState<'date' | 'merchant' | 'category' | 'amount'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
-  const [showExcludeDropdown, setShowExcludeDropdown] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
   useEffect(() => {
     setTypeFilter(defaultTypeFilter);
@@ -67,7 +67,7 @@ export default function TransactionList({
         return false;
       }
       if (selectedCategory && t.category !== selectedCategory) return false;
-      if (excludedCategories.length > 0 && excludedCategories.includes(t.category)) return false;
+      if (selectedCategories.length > 0 && !selectedCategories.includes(t.category)) return false;
       if (selectedAccounts.length > 0 && !selectedAccounts.includes(t.account)) return false;
       if (recurringFilter !== 'all' && t.recurring !== recurringFilter) return false;
       // Type filter
@@ -90,7 +90,7 @@ export default function TransactionList({
       }
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-  }, [transactions, searchQuery, selectedCategory, excludedCategories, selectedAccounts, recurringFilter, typeFilter, sortColumn, sortDirection]);
+  }, [transactions, searchQuery, selectedCategory, selectedCategories, selectedAccounts, recurringFilter, typeFilter, sortColumn, sortDirection]);
 
   const total = useMemo(() => {
     return filteredTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
@@ -105,24 +105,41 @@ export default function TransactionList({
       <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto">
         <div className="relative">
           <button
-            onClick={() => setShowExcludeDropdown(!showExcludeDropdown)}
+            onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
             className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
           >
-            Exclude {excludedCategories.length > 0 && `(${excludedCategories.length})`}
+            {selectedCategories.length === 0 ? 'All Categories' : `Categories (${selectedCategories.length})`}
             <span className="text-[10px]">▼</span>
           </button>
-          {showExcludeDropdown && (
+          {showCategoryDropdown && (
             <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-10 max-h-48 overflow-y-auto">
+              <label className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap border-b border-neutral-100 font-medium">
+                <input
+                  type="checkbox"
+                  checked={selectedCategories.length === 0}
+                  onChange={() => setSelectedCategories([])}
+                />
+                Select All
+              </label>
               {categories.map((cat) => (
                 <label key={cat} className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap">
                   <input
                     type="checkbox"
-                    checked={excludedCategories.includes(cat)}
+                    checked={selectedCategories.length === 0 || selectedCategories.includes(cat)}
                     onChange={(e) => {
-                      if (e.target.checked) {
-                        setExcludedCategories([...excludedCategories, cat]);
+                      if (selectedCategories.length === 0) {
+                        // Currently "all" selected, switch to just this one unchecked
+                        setSelectedCategories(categories.filter((c) => c !== cat));
+                      } else if (e.target.checked) {
+                        const newSelected = [...selectedCategories, cat];
+                        // If all are selected, reset to empty (meaning all)
+                        if (newSelected.length === categories.length) {
+                          setSelectedCategories([]);
+                        } else {
+                          setSelectedCategories(newSelected);
+                        }
                       } else {
-                        setExcludedCategories(excludedCategories.filter((c) => c !== cat));
+                        setSelectedCategories(selectedCategories.filter((c) => c !== cat));
                       }
                     }}
                   />
