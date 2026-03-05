@@ -113,7 +113,7 @@ export default function TransactionList({
             {selectedCategories.length === 0 ? 'All Categories' : `${selectedCategories.length} categories`}
             <span className="text-[10px]">▼</span>
           </button>
-          <div className={`absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 min-w-[150px] max-h-64 overflow-y-auto ${catOpen ? 'block' : 'hidden'}`}>
+          {catOpen && <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 min-w-[150px] max-h-64 overflow-y-auto">
             <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs border-b border-neutral-100">
               <input
                 type="checkbox"
@@ -141,7 +141,7 @@ export default function TransactionList({
                 {cat}
               </label>
             ))}
-          </div>
+          </div>}
         </div>
 
         {/* Accounts Multi-Select */}
@@ -154,7 +154,7 @@ export default function TransactionList({
             {selectedAccounts.length === 0 ? 'All Accounts' : `${selectedAccounts.length} accounts`}
             <span className="text-[10px]">▼</span>
           </button>
-          <div className={`absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 min-w-[150px] max-h-64 overflow-y-auto ${accOpen ? 'block' : 'hidden'}`}>
+          {accOpen && <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 min-w-[150px] max-h-64 overflow-y-auto">
             <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs border-b border-neutral-100">
               <input
                 type="checkbox"
@@ -182,7 +182,7 @@ export default function TransactionList({
                 {acc}
               </label>
             ))}
-          </div>
+          </div>}
         </div>
 
         <select
