@@ -112,39 +112,47 @@ export default function TransactionList({
             <span className="text-[10px]">▼</span>
           </button>
           {showCategoryDropdown && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-10 max-h-48 overflow-y-auto">
-              <label className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap border-b border-neutral-100 font-medium">
+            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-10 max-h-48 overflow-y-auto min-w-[120px]">
+              <div
+                className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap border-b border-neutral-100 font-medium"
+                onClick={() => setSelectedCategories([])}
+              >
                 <input
                   type="checkbox"
                   checked={selectedCategories.length === 0}
-                  onChange={() => setSelectedCategories([])}
+                  readOnly
                 />
                 Select All
-              </label>
+              </div>
               {categories.map((cat) => (
-                <label key={cat} className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap">
+                <div
+                  key={cat}
+                  className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap"
+                  onClick={() => {
+                    if (selectedCategories.length === 0) {
+                      // Currently all selected, uncheck this one = select all except this
+                      setSelectedCategories(categories.filter((c) => c !== cat));
+                    } else if (selectedCategories.includes(cat)) {
+                      // Already selected, remove it
+                      setSelectedCategories(selectedCategories.filter((c) => c !== cat));
+                    } else {
+                      // Not selected, add it
+                      const newSelected = [...selectedCategories, cat];
+                      if (newSelected.length === categories.length) {
+                        setSelectedCategories([]);
+                      } else {
+                        setSelectedCategories(newSelected);
+                      }
+                    }
+                  }}
+                >
                   <input
                     type="checkbox"
                     checked={selectedCategories.length === 0 || selectedCategories.includes(cat)}
-                    onChange={(e) => {
-                      if (selectedCategories.length === 0) {
-                        // Currently "all" selected, switch to just this one unchecked
-                        setSelectedCategories(categories.filter((c) => c !== cat));
-                      } else if (e.target.checked) {
-                        const newSelected = [...selectedCategories, cat];
-                        // If all are selected, reset to empty (meaning all)
-                        if (newSelected.length === categories.length) {
-                          setSelectedCategories([]);
-                        } else {
-                          setSelectedCategories(newSelected);
-                        }
-                      } else {
-                        setSelectedCategories(selectedCategories.filter((c) => c !== cat));
-                      }
-                    }}
+                    readOnly
                   />
                   {cat}
-                </label>
+                </div>
               ))}
             </div>
           )}
@@ -155,26 +163,48 @@ export default function TransactionList({
             onClick={() => setShowAccountDropdown(!showAccountDropdown)}
             className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
           >
-            Accounts {selectedAccounts.length > 0 && `(${selectedAccounts.length})`}
+            {selectedAccounts.length === 0 ? 'All Accounts' : `Accounts (${selectedAccounts.length})`}
             <span className="text-[10px]">▼</span>
           </button>
           {showAccountDropdown && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-10 max-h-48 overflow-y-auto">
+            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-10 max-h-48 overflow-y-auto min-w-[120px]">
+              <div
+                className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap border-b border-neutral-100 font-medium"
+                onClick={() => setSelectedAccounts([])}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedAccounts.length === 0}
+                  readOnly
+                />
+                Select All
+              </div>
               {accounts.map((acc) => (
-                <label key={acc} className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap">
+                <div
+                  key={acc}
+                  className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap"
+                  onClick={() => {
+                    if (selectedAccounts.length === 0) {
+                      setSelectedAccounts(accounts.filter((a) => a !== acc));
+                    } else if (selectedAccounts.includes(acc)) {
+                      setSelectedAccounts(selectedAccounts.filter((a) => a !== acc));
+                    } else {
+                      const newSelected = [...selectedAccounts, acc];
+                      if (newSelected.length === accounts.length) {
+                        setSelectedAccounts([]);
+                      } else {
+                        setSelectedAccounts(newSelected);
+                      }
+                    }
+                  }}
+                >
                   <input
                     type="checkbox"
-                    checked={selectedAccounts.includes(acc)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedAccounts([...selectedAccounts, acc]);
-                      } else {
-                        setSelectedAccounts(selectedAccounts.filter((a) => a !== acc));
-                      }
-                    }}
+                    checked={selectedAccounts.length === 0 || selectedAccounts.includes(acc)}
+                    readOnly
                   />
                   {acc}
-                </label>
+                </div>
               ))}
             </div>
           )}
