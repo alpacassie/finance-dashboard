@@ -102,7 +102,7 @@ export default function TransactionList({
         {title}
       </h2>
 
-      <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto items-start">
+      <div className="flex gap-2 mb-4 flex-wrap items-start">
         {/* Categories Multi-Select */}
         <div className="relative">
           <button
@@ -113,31 +113,32 @@ export default function TransactionList({
             {selectedCategories.length === 0 ? 'All Categories' : `${selectedCategories.length} categories`}
             <span className="text-[10px]">▼</span>
           </button>
-          {catOpen && <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 min-w-[150px] max-h-64 overflow-y-auto">
-            <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs border-b border-neutral-100">
-              <input
-                type="checkbox"
-                checked={selectedCategories.length === 0}
-                onChange={() => setSelectedCategories([])}
-              />
+          {catOpen && <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-300 rounded-lg shadow-xl z-50 min-w-[180px] max-h-64 overflow-y-auto py-1">
+            <label
+              className="flex items-center gap-2 px-3 py-2 hover:bg-blue-500 hover:text-white cursor-pointer text-sm"
+              onClick={() => setSelectedCategories([])}
+            >
+              <span>{selectedCategories.length === 0 ? '✓' : '\u00A0\u00A0'}</span>
               <span className="font-medium">Select All</span>
             </label>
+            <div className="border-t border-neutral-200 my-1"></div>
             {categories.map((cat) => (
-              <label key={cat} className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs">
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.length === 0 || selectedCategories.includes(cat)}
-                  onChange={() => {
-                    if (selectedCategories.length === 0) {
-                      setSelectedCategories(categories.filter(c => c !== cat));
-                    } else if (selectedCategories.includes(cat)) {
-                      setSelectedCategories(selectedCategories.filter(c => c !== cat));
-                    } else {
-                      const newSel = [...selectedCategories, cat];
-                      setSelectedCategories(newSel.length === categories.length ? [] : newSel);
-                    }
-                  }}
-                />
+              <label
+                key={cat}
+                className="flex items-center gap-2 px-3 py-2 hover:bg-blue-500 hover:text-white cursor-pointer text-sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (selectedCategories.length === 0) {
+                    setSelectedCategories(categories.filter(c => c !== cat));
+                  } else if (selectedCategories.includes(cat)) {
+                    setSelectedCategories(selectedCategories.filter(c => c !== cat));
+                  } else {
+                    const newSel = [...selectedCategories, cat];
+                    setSelectedCategories(newSel.length === categories.length ? [] : newSel);
+                  }
+                }}
+              >
+                <span>{(selectedCategories.length === 0 || selectedCategories.includes(cat)) ? '✓' : '\u00A0\u00A0'}</span>
                 {cat}
               </label>
             ))}
@@ -154,31 +155,32 @@ export default function TransactionList({
             {selectedAccounts.length === 0 ? 'All Accounts' : `${selectedAccounts.length} accounts`}
             <span className="text-[10px]">▼</span>
           </button>
-          {accOpen && <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 min-w-[150px] max-h-64 overflow-y-auto">
-            <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs border-b border-neutral-100">
-              <input
-                type="checkbox"
-                checked={selectedAccounts.length === 0}
-                onChange={() => setSelectedAccounts([])}
-              />
+          {accOpen && <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-300 rounded-lg shadow-xl z-50 min-w-[180px] max-h-64 overflow-y-auto py-1">
+            <label
+              className="flex items-center gap-2 px-3 py-2 hover:bg-blue-500 hover:text-white cursor-pointer text-sm"
+              onClick={() => setSelectedAccounts([])}
+            >
+              <span>{selectedAccounts.length === 0 ? '✓' : '\u00A0\u00A0'}</span>
               <span className="font-medium">Select All</span>
             </label>
+            <div className="border-t border-neutral-200 my-1"></div>
             {accounts.map((acc) => (
-              <label key={acc} className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs">
-                <input
-                  type="checkbox"
-                  checked={selectedAccounts.length === 0 || selectedAccounts.includes(acc)}
-                  onChange={() => {
-                    if (selectedAccounts.length === 0) {
-                      setSelectedAccounts(accounts.filter(a => a !== acc));
-                    } else if (selectedAccounts.includes(acc)) {
-                      setSelectedAccounts(selectedAccounts.filter(a => a !== acc));
-                    } else {
-                      const newSel = [...selectedAccounts, acc];
-                      setSelectedAccounts(newSel.length === accounts.length ? [] : newSel);
-                    }
-                  }}
-                />
+              <label
+                key={acc}
+                className="flex items-center gap-2 px-3 py-2 hover:bg-blue-500 hover:text-white cursor-pointer text-sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (selectedAccounts.length === 0) {
+                    setSelectedAccounts(accounts.filter(a => a !== acc));
+                  } else if (selectedAccounts.includes(acc)) {
+                    setSelectedAccounts(selectedAccounts.filter(a => a !== acc));
+                  } else {
+                    const newSel = [...selectedAccounts, acc];
+                    setSelectedAccounts(newSel.length === accounts.length ? [] : newSel);
+                  }
+                }}
+              >
+                <span>{(selectedAccounts.length === 0 || selectedAccounts.includes(acc)) ? '✓' : '\u00A0\u00A0'}</span>
                 {acc}
               </label>
             ))}
