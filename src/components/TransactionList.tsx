@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Transaction } from '@/lib/supabase';
 
 interface TransactionListProps {
@@ -29,8 +29,24 @@ export default function TransactionList({
   const [typeFilter, setTypeFilter] = useState<string>(defaultTypeFilter);
   const [sortColumn, setSortColumn] = useState<'date' | 'merchant' | 'category' | 'amount'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [catDropdownOpen, setCatDropdownOpen] = useState(false);
-  const [accDropdownOpen, setAccDropdownOpen] = useState(false);
+  const [catOpen, setCatOpen] = useState(false);
+  const [accOpen, setAccOpen] = useState(false);
+  const catRef = useRef<HTMLDivElement>(null);
+  const accRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (catRef.current && !catRef.current.contains(e.target as Node)) {
+        setCatOpen(false);
+      }
+      if (accRef.current && !accRef.current.contains(e.target as Node)) {
+        setAccOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     setTypeFilter(defaultTypeFilter);
@@ -102,92 +118,88 @@ export default function TransactionList({
         {title}
       </h2>
 
-      <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto">
+      <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto items-start">
         {/* Categories Multi-Select */}
-        <div className="relative">
-          <select
-            value=""
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val === '__all__') {
-                setSelectedCategories([]);
-              } else if (val && !selectedCategories.includes(val)) {
-                setSelectedCategories([...selectedCategories, val]);
-              }
-            }}
-            className="text-xs border border-neutral-200 px-2 py-1 bg-white"
+        <div className="relative" ref={catRef}>
+          <button
+            type="button"
+            onClick={() => setCatOpen(!catOpen)}
+            className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
           >
-            <option value="">
-              {selectedCategories.length === 0 ? 'All Categories' : `${selectedCategories.length} categories`}
-            </option>
-            <option value="__all__">✓ Select All</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat} disabled={selectedCategories.includes(cat)}>
-                {selectedCategories.includes(cat) ? `✓ ${cat}` : cat}
-              </option>
-            ))}
-          </select>
-          {selectedCategories.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {selectedCategories.map((cat) => (
-                <span
-                  key={cat}
-                  className="text-[10px] bg-neutral-100 px-1 py-0.5 flex items-center gap-1"
-                >
+            {selectedCategories.length === 0 ? 'All Categories' : `${selectedCategories.length} categories`}
+            <span className="text-[10px]">▼</span>
+          </button>
+          {catOpen && (
+            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 min-w-[150px] max-h-64 overflow-y-auto">
+              <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs border-b border-neutral-100">
+                <input
+                  type="checkbox"
+                  checked={selectedCategories.length === 0}
+                  onChange={() => setSelectedCategories([])}
+                />
+                <span className="font-medium">Select All</span>
+              </label>
+              {categories.map((cat) => (
+                <label key={cat} className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs">
+                  <input
+                    type="checkbox"
+                    checked={selectedCategories.length === 0 || selectedCategories.includes(cat)}
+                    onChange={() => {
+                      if (selectedCategories.length === 0) {
+                        setSelectedCategories(categories.filter(c => c !== cat));
+                      } else if (selectedCategories.includes(cat)) {
+                        setSelectedCategories(selectedCategories.filter(c => c !== cat));
+                      } else {
+                        const newSel = [...selectedCategories, cat];
+                        setSelectedCategories(newSel.length === categories.length ? [] : newSel);
+                      }
+                    }}
+                  />
                   {cat}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCategories(selectedCategories.filter(c => c !== cat))}
-                    className="hover:text-red-500"
-                  >
-                    ×
-                  </button>
-                </span>
+                </label>
               ))}
             </div>
           )}
         </div>
 
         {/* Accounts Multi-Select */}
-        <div className="relative">
-          <select
-            value=""
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val === '__all__') {
-                setSelectedAccounts([]);
-              } else if (val && !selectedAccounts.includes(val)) {
-                setSelectedAccounts([...selectedAccounts, val]);
-              }
-            }}
-            className="text-xs border border-neutral-200 px-2 py-1 bg-white"
+        <div className="relative" ref={accRef}>
+          <button
+            type="button"
+            onClick={() => setAccOpen(!accOpen)}
+            className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
           >
-            <option value="">
-              {selectedAccounts.length === 0 ? 'All Accounts' : `${selectedAccounts.length} accounts`}
-            </option>
-            <option value="__all__">✓ Select All</option>
-            {accounts.map((acc) => (
-              <option key={acc} value={acc} disabled={selectedAccounts.includes(acc)}>
-                {selectedAccounts.includes(acc) ? `✓ ${acc}` : acc}
-              </option>
-            ))}
-          </select>
-          {selectedAccounts.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {selectedAccounts.map((acc) => (
-                <span
-                  key={acc}
-                  className="text-[10px] bg-neutral-100 px-1 py-0.5 flex items-center gap-1"
-                >
+            {selectedAccounts.length === 0 ? 'All Accounts' : `${selectedAccounts.length} accounts`}
+            <span className="text-[10px]">▼</span>
+          </button>
+          {accOpen && (
+            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 min-w-[150px] max-h-64 overflow-y-auto">
+              <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs border-b border-neutral-100">
+                <input
+                  type="checkbox"
+                  checked={selectedAccounts.length === 0}
+                  onChange={() => setSelectedAccounts([])}
+                />
+                <span className="font-medium">Select All</span>
+              </label>
+              {accounts.map((acc) => (
+                <label key={acc} className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs">
+                  <input
+                    type="checkbox"
+                    checked={selectedAccounts.length === 0 || selectedAccounts.includes(acc)}
+                    onChange={() => {
+                      if (selectedAccounts.length === 0) {
+                        setSelectedAccounts(accounts.filter(a => a !== acc));
+                      } else if (selectedAccounts.includes(acc)) {
+                        setSelectedAccounts(selectedAccounts.filter(a => a !== acc));
+                      } else {
+                        const newSel = [...selectedAccounts, acc];
+                        setSelectedAccounts(newSel.length === accounts.length ? [] : newSel);
+                      }
+                    }}
+                  />
                   {acc}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedAccounts(selectedAccounts.filter(a => a !== acc))}
-                    className="hover:text-red-500"
-                  >
-                    ×
-                  </button>
-                </span>
+                </label>
               ))}
             </div>
           )}
