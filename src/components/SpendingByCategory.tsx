@@ -33,7 +33,7 @@ export default function SpendingByCategory({
   const chartHeight = Math.max(200, data.length * 28);
 
   return (
-    <div className="border border-neutral-200 p-4">
+    <div className="border border-neutral-200 p-4 h-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xs text-neutral-500 uppercase tracking-wide">
           Spending by Category

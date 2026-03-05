@@ -31,7 +31,7 @@ export default function MonthlyTrends({ data, selectedCategory }: MonthlyTrendsP
   };
 
   return (
-    <div className="border border-neutral-200 p-4">
+    <div className="border border-neutral-200 p-4 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xs text-neutral-500 uppercase tracking-wide">
           Monthly Spending Trends
@@ -42,7 +42,7 @@ export default function MonthlyTrends({ data, selectedCategory }: MonthlyTrendsP
           </span>
         )}
       </div>
-      <div className="h-64">
+      <div className="flex-1 min-h-[200px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
