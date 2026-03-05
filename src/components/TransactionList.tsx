@@ -97,7 +97,7 @@ export default function TransactionList({
   }, [filteredTransactions]);
 
   return (
-    <div className="border border-neutral-200 p-4">
+    <div className="border border-neutral-200 p-4 max-w-[480px]">
       <h2 className="text-xs text-neutral-500 uppercase tracking-wide mb-4">
         {title}
       </h2>
