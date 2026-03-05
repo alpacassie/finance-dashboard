@@ -67,8 +67,10 @@ export default function TransactionList({
         return false;
       }
       if (selectedCategory && t.category !== selectedCategory) return false;
-      if (selectedCategories.length > 0 && !selectedCategories.includes(t.category)) return false;
-      if (selectedAccounts.length > 0 && !selectedAccounts.includes(t.account)) return false;
+      if (selectedCategories.length > 0 && !selectedCategories.includes(t.category) && !selectedCategories.includes('__none__')) return false;
+      if (selectedCategories.includes('__none__')) return false;
+      if (selectedAccounts.length > 0 && !selectedAccounts.includes(t.account) && !selectedAccounts.includes('__none__')) return false;
+      if (selectedAccounts.includes('__none__')) return false;
       if (recurringFilter !== 'all' && t.recurring !== recurringFilter) return false;
       // Type filter
       if (typeFilter === 'spending' && (t.category === 'income' || t.category === 'transfer')) return false;
@@ -107,39 +109,45 @@ export default function TransactionList({
         <div className="relative">
           <button
             type="button"
-            onClick={() => setCatOpen(prev => !prev)}
+            onClick={() => { setCatOpen(prev => !prev); setAccOpen(false); }}
             className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
           >
             {selectedCategories.length === 0 ? 'All Categories' : `${selectedCategories.length} categories`}
             <span className="text-[10px]">▼</span>
           </button>
-          {catOpen && <div className="absolute top-full left-0 mt-1 bg-[#4a4a4a] rounded-md shadow-2xl z-50 py-1 whitespace-nowrap">
-            <label
-              className={`flex items-center gap-2 px-3 py-1 cursor-pointer text-[13px] text-white ${selectedCategories.length === 0 ? 'bg-blue-500' : 'hover:bg-blue-500'}`}
-              onClick={() => setSelectedCategories([])}
+          {catOpen && <div className="absolute top-full left-0 mt-1 bg-[#3d3d3d]/95 backdrop-blur-sm rounded-md shadow-2xl z-50 py-0.5 whitespace-nowrap">
+            <div
+              className={`flex items-center gap-1.5 px-2 py-0.5 mx-0.5 rounded cursor-pointer text-[11px] text-white ${selectedCategories.length === 0 ? 'bg-blue-500' : 'hover:bg-blue-500'}`}
+              onClick={() => {
+                if (selectedCategories.length === 0) {
+                  setSelectedCategories(['__none__']);
+                } else {
+                  setSelectedCategories([]);
+                }
+              }}
             >
-              <span className="w-4">{selectedCategories.length === 0 ? '✓' : ''}</span>
+              <span className="w-3 text-[10px]">{selectedCategories.length === 0 ? '✓' : ''}</span>
               Select All
-            </label>
+            </div>
             {categories.map((cat) => (
-              <label
+              <div
                 key={cat}
-                className={`flex items-center gap-2 px-3 py-1 cursor-pointer text-[13px] text-white ${(selectedCategories.length === 0 || selectedCategories.includes(cat)) ? 'hover:bg-blue-500' : 'hover:bg-blue-500'}`}
-                onClick={(e) => {
-                  e.preventDefault();
+                className="flex items-center gap-1.5 px-2 py-0.5 mx-0.5 rounded cursor-pointer text-[11px] text-white hover:bg-blue-500"
+                onClick={() => {
                   if (selectedCategories.length === 0) {
                     setSelectedCategories(categories.filter(c => c !== cat));
                   } else if (selectedCategories.includes(cat)) {
-                    setSelectedCategories(selectedCategories.filter(c => c !== cat));
+                    const newSel = selectedCategories.filter(c => c !== cat);
+                    setSelectedCategories(newSel.length === 0 ? ['__none__'] : newSel);
                   } else {
-                    const newSel = [...selectedCategories, cat];
+                    const newSel = [...selectedCategories.filter(c => c !== '__none__'), cat];
                     setSelectedCategories(newSel.length === categories.length ? [] : newSel);
                   }
                 }}
               >
-                <span className="w-4">{(selectedCategories.length === 0 || selectedCategories.includes(cat)) ? '✓' : ''}</span>
+                <span className="w-3 text-[10px]">{(selectedCategories.length === 0 || selectedCategories.includes(cat)) ? '✓' : ''}</span>
                 {cat}
-              </label>
+              </div>
             ))}
           </div>}
         </div>
@@ -148,39 +156,45 @@ export default function TransactionList({
         <div className="relative">
           <button
             type="button"
-            onClick={() => setAccOpen(prev => !prev)}
+            onClick={() => { setAccOpen(prev => !prev); setCatOpen(false); }}
             className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
           >
             {selectedAccounts.length === 0 ? 'All Accounts' : `${selectedAccounts.length} accounts`}
             <span className="text-[10px]">▼</span>
           </button>
-          {accOpen && <div className="absolute top-full left-0 mt-1 bg-[#4a4a4a] rounded-md shadow-2xl z-50 py-1 whitespace-nowrap">
-            <label
-              className={`flex items-center gap-2 px-3 py-1 cursor-pointer text-[13px] text-white ${selectedAccounts.length === 0 ? 'bg-blue-500' : 'hover:bg-blue-500'}`}
-              onClick={() => setSelectedAccounts([])}
+          {accOpen && <div className="absolute top-full left-0 mt-1 bg-[#3d3d3d]/95 backdrop-blur-sm rounded-md shadow-2xl z-50 py-0.5 whitespace-nowrap">
+            <div
+              className={`flex items-center gap-1.5 px-2 py-0.5 mx-0.5 rounded cursor-pointer text-[11px] text-white ${selectedAccounts.length === 0 ? 'bg-blue-500' : 'hover:bg-blue-500'}`}
+              onClick={() => {
+                if (selectedAccounts.length === 0) {
+                  setSelectedAccounts(['__none__']);
+                } else {
+                  setSelectedAccounts([]);
+                }
+              }}
             >
-              <span className="w-4">{selectedAccounts.length === 0 ? '✓' : ''}</span>
+              <span className="w-3 text-[10px]">{selectedAccounts.length === 0 ? '✓' : ''}</span>
               Select All
-            </label>
+            </div>
             {accounts.map((acc) => (
-              <label
+              <div
                 key={acc}
-                className={`flex items-center gap-2 px-3 py-1 cursor-pointer text-[13px] text-white hover:bg-blue-500`}
-                onClick={(e) => {
-                  e.preventDefault();
+                className="flex items-center gap-1.5 px-2 py-0.5 mx-0.5 rounded cursor-pointer text-[11px] text-white hover:bg-blue-500"
+                onClick={() => {
                   if (selectedAccounts.length === 0) {
                     setSelectedAccounts(accounts.filter(a => a !== acc));
                   } else if (selectedAccounts.includes(acc)) {
-                    setSelectedAccounts(selectedAccounts.filter(a => a !== acc));
+                    const newSel = selectedAccounts.filter(a => a !== acc);
+                    setSelectedAccounts(newSel.length === 0 ? ['__none__'] : newSel);
                   } else {
-                    const newSel = [...selectedAccounts, acc];
+                    const newSel = [...selectedAccounts.filter(a => a !== '__none__'), acc];
                     setSelectedAccounts(newSel.length === accounts.length ? [] : newSel);
                   }
                 }}
               >
-                <span className="w-4">{(selectedAccounts.length === 0 || selectedAccounts.includes(acc)) ? '✓' : ''}</span>
+                <span className="w-3 text-[10px]">{(selectedAccounts.length === 0 || selectedAccounts.includes(acc)) ? '✓' : ''}</span>
                 {acc}
-              </label>
+              </div>
             ))}
           </div>}
         </div>
