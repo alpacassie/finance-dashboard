@@ -218,16 +218,17 @@ export default function Dashboard({ transactions }: DashboardProps) {
         <MonthlyTrends data={monthlyData} selectedCategory={selectedCategory} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+        <div className="lg:col-span-3">
           <TransactionList
-            transactions={showIncomeView ? incomeTransactions : spendingTransactions}
-            categories={showIncomeView ? [] : categories}
+            transactions={showIncomeView ? incomeTransactions : categoryFilteredTransactions}
+            categories={showIncomeView ? [] : [...new Set(categoryFilteredTransactions.map((t) => t.category))].sort()}
             accounts={accounts}
             owners={owners}
             selectedCategory={showIncomeView ? null : selectedCategory}
             onCategoryChange={setSelectedCategory}
             title={showIncomeView ? 'Income' : 'Transactions'}
+            defaultTypeFilter={showIncomeView ? 'all' : 'spending'}
           />
         </div>
         <RecurringTracker transactions={spendingTransactions} />

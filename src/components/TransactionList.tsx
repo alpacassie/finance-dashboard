@@ -11,6 +11,7 @@ interface TransactionListProps {
   selectedCategory: string | null;
   onCategoryChange: (category: string | null) => void;
   title?: string;
+  defaultTypeFilter?: 'all' | 'spending' | 'income' | 'transfer';
 }
 
 export default function TransactionList({
@@ -21,11 +22,13 @@ export default function TransactionList({
   selectedCategory,
   onCategoryChange,
   title = 'Transactions',
+  defaultTypeFilter = 'spending',
 }: TransactionListProps) {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [accountFilter, setAccountFilter] = useState<string>('all');
   const [ownerFilter, setOwnerFilter] = useState<string>('all');
   const [recurringFilter, setRecurringFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>(defaultTypeFilter);
   const [sortColumn, setSortColumn] = useState<'date' | 'merchant' | 'category' | 'amount'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
@@ -63,6 +66,10 @@ export default function TransactionList({
       if (accountFilter !== 'all' && t.account !== accountFilter) return false;
       if (ownerFilter !== 'all' && t.owner !== ownerFilter) return false;
       if (recurringFilter !== 'all' && t.recurring !== recurringFilter) return false;
+      // Type filter
+      if (typeFilter === 'spending' && (t.category === 'income' || t.category === 'transfer')) return false;
+      if (typeFilter === 'income' && t.category !== 'income') return false;
+      if (typeFilter === 'transfer' && t.category !== 'transfer') return false;
       return true;
     });
 
@@ -79,7 +86,7 @@ export default function TransactionList({
       }
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-  }, [transactions, searchQuery, selectedCategory, accountFilter, ownerFilter, recurringFilter, sortColumn, sortDirection]);
+  }, [transactions, searchQuery, selectedCategory, accountFilter, ownerFilter, recurringFilter, typeFilter, sortColumn, sortDirection]);
 
   const total = useMemo(() => {
     return filteredTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
@@ -139,12 +146,23 @@ export default function TransactionList({
           onChange={(e) => setRecurringFilter(e.target.value)}
           className="text-xs border border-neutral-200 px-2 py-1 bg-white"
         >
-          <option value="all">All Types</option>
+          <option value="all">All Recurring</option>
           <option value="no">One-time</option>
           <option value="weekly">Weekly</option>
           <option value="every 2 weeks">Every 2 weeks</option>
           <option value="monthly">Monthly</option>
           <option value="yearly">Yearly</option>
+        </select>
+
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          className="text-xs border border-neutral-200 px-2 py-1 bg-white"
+        >
+          <option value="all">All Types</option>
+          <option value="spending">Spending</option>
+          <option value="income">Income</option>
+          <option value="transfer">Transfer</option>
         </select>
 
         <input
