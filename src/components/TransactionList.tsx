@@ -29,8 +29,6 @@ export default function TransactionList({
   const [typeFilter, setTypeFilter] = useState<string>(defaultTypeFilter);
   const [sortColumn, setSortColumn] = useState<'date' | 'merchant' | 'category' | 'amount'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
   useEffect(() => {
     setTypeFilter(defaultTypeFilter);
@@ -103,114 +101,37 @@ export default function TransactionList({
       </h2>
 
       <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto">
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-            className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
-          >
-            {selectedCategories.length === 0 ? 'All Categories' : `Categories (${selectedCategories.length})`}
-            <span className="text-[10px]">▼</span>
-          </button>
-          {showCategoryDropdown && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-10 max-h-48 overflow-y-auto min-w-[120px]">
-              <div
-                className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap border-b border-neutral-100 font-medium"
-                onClick={() => setSelectedCategories([])}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.length === 0}
-                  readOnly
-                />
-                Select All
-              </div>
-              {categories.map((cat) => (
-                <div
-                  key={cat}
-                  className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap"
-                  onClick={() => {
-                    if (selectedCategories.length === 0) {
-                      // Currently all selected, uncheck this one = select all except this
-                      setSelectedCategories(categories.filter((c) => c !== cat));
-                    } else if (selectedCategories.includes(cat)) {
-                      // Already selected, remove it
-                      setSelectedCategories(selectedCategories.filter((c) => c !== cat));
-                    } else {
-                      // Not selected, add it
-                      const newSelected = [...selectedCategories, cat];
-                      if (newSelected.length === categories.length) {
-                        setSelectedCategories([]);
-                      } else {
-                        setSelectedCategories(newSelected);
-                      }
-                    }
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedCategories.length === 0 || selectedCategories.includes(cat)}
-                    readOnly
-                  />
-                  {cat}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <select
+          multiple
+          value={selectedCategories}
+          onChange={(e) => {
+            const values = Array.from(e.target.selectedOptions, (opt) => opt.value);
+            setSelectedCategories(values);
+          }}
+          className="text-xs border border-neutral-200 px-2 py-1 bg-white min-w-[100px] h-[60px]"
+        >
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
 
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setShowAccountDropdown(!showAccountDropdown)}
-            className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
-          >
-            {selectedAccounts.length === 0 ? 'All Accounts' : `Accounts (${selectedAccounts.length})`}
-            <span className="text-[10px]">▼</span>
-          </button>
-          {showAccountDropdown && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-10 max-h-48 overflow-y-auto min-w-[120px]">
-              <div
-                className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap border-b border-neutral-100 font-medium"
-                onClick={() => setSelectedAccounts([])}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedAccounts.length === 0}
-                  readOnly
-                />
-                Select All
-              </div>
-              {accounts.map((acc) => (
-                <div
-                  key={acc}
-                  className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap"
-                  onClick={() => {
-                    if (selectedAccounts.length === 0) {
-                      setSelectedAccounts(accounts.filter((a) => a !== acc));
-                    } else if (selectedAccounts.includes(acc)) {
-                      setSelectedAccounts(selectedAccounts.filter((a) => a !== acc));
-                    } else {
-                      const newSelected = [...selectedAccounts, acc];
-                      if (newSelected.length === accounts.length) {
-                        setSelectedAccounts([]);
-                      } else {
-                        setSelectedAccounts(newSelected);
-                      }
-                    }
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedAccounts.length === 0 || selectedAccounts.includes(acc)}
-                    readOnly
-                  />
-                  {acc}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <select
+          multiple
+          value={selectedAccounts}
+          onChange={(e) => {
+            const values = Array.from(e.target.selectedOptions, (opt) => opt.value);
+            setSelectedAccounts(values);
+          }}
+          className="text-xs border border-neutral-200 px-2 py-1 bg-white min-w-[120px] h-[60px]"
+        >
+          {accounts.map((acc) => (
+            <option key={acc} value={acc}>
+              {acc}
+            </option>
+          ))}
+        </select>
 
         <select
           value={recurringFilter}
