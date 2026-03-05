@@ -23,12 +23,14 @@ export default function TransactionList({
   defaultTypeFilter = 'spending',
 }: TransactionListProps) {
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [accountFilter, setAccountFilter] = useState<string>('all');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [recurringFilter, setRecurringFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>(defaultTypeFilter);
   const [sortColumn, setSortColumn] = useState<'date' | 'merchant' | 'category' | 'amount'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [catDropdownOpen, setCatDropdownOpen] = useState(false);
+  const [accDropdownOpen, setAccDropdownOpen] = useState(false);
 
   useEffect(() => {
     setTypeFilter(defaultTypeFilter);
@@ -65,8 +67,8 @@ export default function TransactionList({
         return false;
       }
       if (selectedCategory && t.category !== selectedCategory) return false;
-      if (categoryFilter !== 'all' && t.category !== categoryFilter) return false;
-      if (accountFilter !== 'all' && t.account !== accountFilter) return false;
+      if (selectedCategories.length > 0 && !selectedCategories.includes(t.category)) return false;
+      if (selectedAccounts.length > 0 && !selectedAccounts.includes(t.account)) return false;
       if (recurringFilter !== 'all' && t.recurring !== recurringFilter) return false;
       // Type filter
       if (typeFilter === 'spending' && (t.category === 'income' || t.category === 'transfer')) return false;
@@ -88,7 +90,7 @@ export default function TransactionList({
       }
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-  }, [transactions, searchQuery, selectedCategory, categoryFilter, accountFilter, recurringFilter, typeFilter, sortColumn, sortDirection]);
+  }, [transactions, searchQuery, selectedCategory, selectedCategories, selectedAccounts, recurringFilter, typeFilter, sortColumn, sortDirection]);
 
   const total = useMemo(() => {
     return filteredTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
@@ -101,27 +103,95 @@ export default function TransactionList({
       </h2>
 
       <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto">
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="text-xs border border-neutral-200 px-2 py-1 bg-white"
-        >
-          <option value="all">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
+        {/* Categories Multi-Select */}
+        <div className="relative">
+          <select
+            value=""
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === '__all__') {
+                setSelectedCategories([]);
+              } else if (val && !selectedCategories.includes(val)) {
+                setSelectedCategories([...selectedCategories, val]);
+              }
+            }}
+            className="text-xs border border-neutral-200 px-2 py-1 bg-white"
+          >
+            <option value="">
+              {selectedCategories.length === 0 ? 'All Categories' : `${selectedCategories.length} categories`}
+            </option>
+            <option value="__all__">✓ Select All</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat} disabled={selectedCategories.includes(cat)}>
+                {selectedCategories.includes(cat) ? `✓ ${cat}` : cat}
+              </option>
+            ))}
+          </select>
+          {selectedCategories.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {selectedCategories.map((cat) => (
+                <span
+                  key={cat}
+                  className="text-[10px] bg-neutral-100 px-1 py-0.5 flex items-center gap-1"
+                >
+                  {cat}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCategories(selectedCategories.filter(c => c !== cat))}
+                    className="hover:text-red-500"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
 
-        <select
-          value={accountFilter}
-          onChange={(e) => setAccountFilter(e.target.value)}
-          className="text-xs border border-neutral-200 px-2 py-1 bg-white"
-        >
-          <option value="all">All Accounts</option>
-          {accounts.map((acc) => (
-            <option key={acc} value={acc}>{acc}</option>
-          ))}
-        </select>
+        {/* Accounts Multi-Select */}
+        <div className="relative">
+          <select
+            value=""
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === '__all__') {
+                setSelectedAccounts([]);
+              } else if (val && !selectedAccounts.includes(val)) {
+                setSelectedAccounts([...selectedAccounts, val]);
+              }
+            }}
+            className="text-xs border border-neutral-200 px-2 py-1 bg-white"
+          >
+            <option value="">
+              {selectedAccounts.length === 0 ? 'All Accounts' : `${selectedAccounts.length} accounts`}
+            </option>
+            <option value="__all__">✓ Select All</option>
+            {accounts.map((acc) => (
+              <option key={acc} value={acc} disabled={selectedAccounts.includes(acc)}>
+                {selectedAccounts.includes(acc) ? `✓ ${acc}` : acc}
+              </option>
+            ))}
+          </select>
+          {selectedAccounts.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {selectedAccounts.map((acc) => (
+                <span
+                  key={acc}
+                  className="text-[10px] bg-neutral-100 px-1 py-0.5 flex items-center gap-1"
+                >
+                  {acc}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedAccounts(selectedAccounts.filter(a => a !== acc))}
+                    className="hover:text-red-500"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
 
         <select
           value={recurringFilter}
