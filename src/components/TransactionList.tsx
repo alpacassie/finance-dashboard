@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Transaction } from '@/lib/supabase';
 
 interface TransactionListProps {
@@ -31,22 +31,7 @@ export default function TransactionList({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [catOpen, setCatOpen] = useState(false);
   const [accOpen, setAccOpen] = useState(false);
-  const catRef = useRef<HTMLDivElement>(null);
-  const accRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (catRef.current && !catRef.current.contains(e.target as Node)) {
-        setCatOpen(false);
-      }
-      if (accRef.current && !accRef.current.contains(e.target as Node)) {
-        setAccOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const [clickCount, setClickCount] = useState(0);
 
   useEffect(() => {
     setTypeFilter(defaultTypeFilter);
@@ -119,14 +104,23 @@ export default function TransactionList({
       </h2>
 
       <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto items-start">
+        {/* Test button */}
+        <button
+          type="button"
+          onClick={() => setClickCount(clickCount + 1)}
+          className="text-xs border border-neutral-200 px-2 py-1 bg-white"
+        >
+          Clicks: {clickCount}
+        </button>
+
         {/* Categories Multi-Select */}
-        <div className="relative" ref={catRef}>
+        <div className="relative">
           <button
             type="button"
             onClick={() => setCatOpen(!catOpen)}
             className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
           >
-            {selectedCategories.length === 0 ? 'All Categories' : `${selectedCategories.length} categories`}
+            {catOpen ? 'OPEN' : 'CLOSED'} - {selectedCategories.length === 0 ? 'All Categories' : `${selectedCategories.length} categories`}
             <span className="text-[10px]">▼</span>
           </button>
           {catOpen && (
@@ -163,7 +157,7 @@ export default function TransactionList({
         </div>
 
         {/* Accounts Multi-Select */}
-        <div className="relative" ref={accRef}>
+        <div className="relative">
           <button
             type="button"
             onClick={() => setAccOpen(!accOpen)}
