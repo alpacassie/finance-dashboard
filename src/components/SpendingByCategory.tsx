@@ -71,8 +71,9 @@ export default function SpendingByCategory({
                 radius={[0, 2, 2, 0]}
                 cursor="pointer"
                 onClick={(data) => {
-                  if (data?.category) {
-                    onCategoryClick(data.category);
+                  const entry = data as unknown as CategoryData;
+                  if (entry?.category) {
+                    onCategoryClick(entry.category);
                   }
                 }}
               >
