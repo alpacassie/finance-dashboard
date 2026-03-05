@@ -121,7 +121,7 @@ export default function Dashboard({ transactions }: DashboardProps) {
   }, [filteredTransactions]);
 
   const categories = [...new Set(filteredTransactions.map((t) => t.category))]
-    .filter((c) => c !== 'income' && c !== 'transfer')
+    .filter((c) => c !== 'income')
     .sort();
   const accounts = [...new Set(filteredTransactions.map((t) => t.account))].sort();
   
