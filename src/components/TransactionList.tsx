@@ -36,6 +36,27 @@ export default function TransactionList({
     setTypeFilter(defaultTypeFilter);
   }, [defaultTypeFilter]);
 
+  // Filter categories based on type filter
+  const filteredCategories = useMemo(() => {
+    if (typeFilter === 'spending') {
+      return categories.filter(c => c !== 'income' && c !== 'transfer');
+    }
+    if (typeFilter === 'income') {
+      return categories.filter(c => c === 'income');
+    }
+    if (typeFilter === 'transfer') {
+      return categories.filter(c => c === 'transfer');
+    }
+    return categories;
+  }, [categories, typeFilter]);
+
+  // Auto-deselect categories that don't match type filter
+  useEffect(() => {
+    if (typeFilter === 'spending') {
+      setSelectedCategories(prev => prev.filter(c => c !== 'income' && c !== 'transfer' && c !== '__none__'));
+    }
+  }, [typeFilter]);
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -129,19 +150,19 @@ export default function TransactionList({
               <span className="w-3 text-[10px]">{selectedCategories.length === 0 ? '✓' : ''}</span>
               Select All
             </div>
-            {categories.map((cat) => (
+            {filteredCategories.map((cat) => (
               <div
                 key={cat}
                 className="flex items-center gap-1.5 px-2 py-0.5 mx-0.5 rounded cursor-pointer text-[11px] text-white hover:bg-blue-500"
                 onClick={() => {
                   if (selectedCategories.length === 0) {
-                    setSelectedCategories(categories.filter(c => c !== cat));
+                    setSelectedCategories(filteredCategories.filter(c => c !== cat));
                   } else if (selectedCategories.includes(cat)) {
                     const newSel = selectedCategories.filter(c => c !== cat);
                     setSelectedCategories(newSel.length === 0 ? ['__none__'] : newSel);
                   } else {
                     const newSel = [...selectedCategories.filter(c => c !== '__none__'), cat];
-                    setSelectedCategories(newSel.length === categories.length ? [] : newSel);
+                    setSelectedCategories(newSel.length === filteredCategories.length ? [] : newSel);
                   }
                 }}
               >
