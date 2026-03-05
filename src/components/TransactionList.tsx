@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Transaction } from '@/lib/supabase';
 
 interface TransactionListProps {
@@ -31,10 +31,26 @@ export default function TransactionList({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [catOpen, setCatOpen] = useState(false);
   const [accOpen, setAccOpen] = useState(false);
+  const catRef = useRef<HTMLDivElement>(null);
+  const accRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setTypeFilter(defaultTypeFilter);
   }, [defaultTypeFilter]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (catRef.current && !catRef.current.contains(e.target as Node)) {
+        setCatOpen(false);
+      }
+      if (accRef.current && !accRef.current.contains(e.target as Node)) {
+        setAccOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Filter categories based on type filter
   const filteredCategories = useMemo(() => {
@@ -127,7 +143,7 @@ export default function TransactionList({
 
       <div className="flex gap-2 mb-4 flex-wrap items-start">
         {/* Categories Multi-Select */}
-        <div className="relative">
+        <div className="relative" ref={catRef}>
           <button
             type="button"
             onClick={() => { setCatOpen(prev => !prev); setAccOpen(false); }}
@@ -174,7 +190,7 @@ export default function TransactionList({
         </div>
 
         {/* Accounts Multi-Select */}
-        <div className="relative">
+        <div className="relative" ref={accRef}>
           <button
             type="button"
             onClick={() => { setAccOpen(prev => !prev); setCatOpen(false); }}
