@@ -118,7 +118,7 @@ export default function TransactionList({
         <select
           value={accountFilter}
           onChange={(e) => setAccountFilter(e.target.value)}
-          className="text-xs border border-neutral-200 px-2 py-1 bg-white max-w-[180px]"
+          className="text-xs border border-neutral-200 px-2 py-1 bg-white max-w-[140px]"
         >
           <option value="all">All Accounts</option>
           {accounts.map((acc) => (
@@ -174,7 +174,7 @@ export default function TransactionList({
         />
       </div>
 
-      <div className="max-h-[420px] overflow-y-auto">
+      <div className="max-h-[360px] overflow-y-auto">
         <table className="w-full text-xs">
           <thead className="sticky top-0 bg-white">
             <tr className="border-b border-neutral-200">
