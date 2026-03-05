@@ -51,7 +51,7 @@ export default function SpendingByCategory({
               <YAxis
                 type="category"
                 dataKey="category"
-                width={80}
+                width={100}
                 tick={{ fontSize: 11, fill: '#737373' }}
                 axisLine={false}
                 tickLine={false}
