@@ -31,7 +31,6 @@ export default function TransactionList({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [catOpen, setCatOpen] = useState(false);
   const [accOpen, setAccOpen] = useState(false);
-  const [clickCount, setClickCount] = useState(0);
 
   useEffect(() => {
     setTypeFilter(defaultTypeFilter);
@@ -104,99 +103,86 @@ export default function TransactionList({
       </h2>
 
       <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto items-start">
-        {/* Test button */}
-        <button
-          type="button"
-          onClick={() => setClickCount(clickCount + 1)}
-          className="text-xs border border-neutral-200 px-2 py-1 bg-white"
-        >
-          Clicks: {clickCount}
-        </button>
-
         {/* Categories Multi-Select */}
         <div className="relative">
           <button
             type="button"
-            onClick={() => setCatOpen(!catOpen)}
+            onClick={() => setCatOpen(prev => !prev)}
             className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
           >
-            {catOpen ? 'OPEN' : 'CLOSED'} - {selectedCategories.length === 0 ? 'All Categories' : `${selectedCategories.length} categories`}
+            {selectedCategories.length === 0 ? 'All Categories' : `${selectedCategories.length} categories`}
             <span className="text-[10px]">▼</span>
           </button>
-          {catOpen && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 min-w-[150px] max-h-64 overflow-y-auto">
-              <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs border-b border-neutral-100">
+          <div className={`absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 min-w-[150px] max-h-64 overflow-y-auto ${catOpen ? 'block' : 'hidden'}`}>
+            <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs border-b border-neutral-100">
+              <input
+                type="checkbox"
+                checked={selectedCategories.length === 0}
+                onChange={() => setSelectedCategories([])}
+              />
+              <span className="font-medium">Select All</span>
+            </label>
+            {categories.map((cat) => (
+              <label key={cat} className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs">
                 <input
                   type="checkbox"
-                  checked={selectedCategories.length === 0}
-                  onChange={() => setSelectedCategories([])}
+                  checked={selectedCategories.length === 0 || selectedCategories.includes(cat)}
+                  onChange={() => {
+                    if (selectedCategories.length === 0) {
+                      setSelectedCategories(categories.filter(c => c !== cat));
+                    } else if (selectedCategories.includes(cat)) {
+                      setSelectedCategories(selectedCategories.filter(c => c !== cat));
+                    } else {
+                      const newSel = [...selectedCategories, cat];
+                      setSelectedCategories(newSel.length === categories.length ? [] : newSel);
+                    }
+                  }}
                 />
-                <span className="font-medium">Select All</span>
+                {cat}
               </label>
-              {categories.map((cat) => (
-                <label key={cat} className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs">
-                  <input
-                    type="checkbox"
-                    checked={selectedCategories.length === 0 || selectedCategories.includes(cat)}
-                    onChange={() => {
-                      if (selectedCategories.length === 0) {
-                        setSelectedCategories(categories.filter(c => c !== cat));
-                      } else if (selectedCategories.includes(cat)) {
-                        setSelectedCategories(selectedCategories.filter(c => c !== cat));
-                      } else {
-                        const newSel = [...selectedCategories, cat];
-                        setSelectedCategories(newSel.length === categories.length ? [] : newSel);
-                      }
-                    }}
-                  />
-                  {cat}
-                </label>
-              ))}
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
         {/* Accounts Multi-Select */}
         <div className="relative">
           <button
             type="button"
-            onClick={() => setAccOpen(!accOpen)}
+            onClick={() => setAccOpen(prev => !prev)}
             className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
           >
             {selectedAccounts.length === 0 ? 'All Accounts' : `${selectedAccounts.length} accounts`}
             <span className="text-[10px]">▼</span>
           </button>
-          {accOpen && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 min-w-[150px] max-h-64 overflow-y-auto">
-              <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs border-b border-neutral-100">
+          <div className={`absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-20 min-w-[150px] max-h-64 overflow-y-auto ${accOpen ? 'block' : 'hidden'}`}>
+            <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs border-b border-neutral-100">
+              <input
+                type="checkbox"
+                checked={selectedAccounts.length === 0}
+                onChange={() => setSelectedAccounts([])}
+              />
+              <span className="font-medium">Select All</span>
+            </label>
+            {accounts.map((acc) => (
+              <label key={acc} className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs">
                 <input
                   type="checkbox"
-                  checked={selectedAccounts.length === 0}
-                  onChange={() => setSelectedAccounts([])}
+                  checked={selectedAccounts.length === 0 || selectedAccounts.includes(acc)}
+                  onChange={() => {
+                    if (selectedAccounts.length === 0) {
+                      setSelectedAccounts(accounts.filter(a => a !== acc));
+                    } else if (selectedAccounts.includes(acc)) {
+                      setSelectedAccounts(selectedAccounts.filter(a => a !== acc));
+                    } else {
+                      const newSel = [...selectedAccounts, acc];
+                      setSelectedAccounts(newSel.length === accounts.length ? [] : newSel);
+                    }
+                  }}
                 />
-                <span className="font-medium">Select All</span>
+                {acc}
               </label>
-              {accounts.map((acc) => (
-                <label key={acc} className="flex items-center gap-2 px-2 py-1.5 hover:bg-neutral-50 cursor-pointer text-xs">
-                  <input
-                    type="checkbox"
-                    checked={selectedAccounts.length === 0 || selectedAccounts.includes(acc)}
-                    onChange={() => {
-                      if (selectedAccounts.length === 0) {
-                        setSelectedAccounts(accounts.filter(a => a !== acc));
-                      } else if (selectedAccounts.includes(acc)) {
-                        setSelectedAccounts(selectedAccounts.filter(a => a !== acc));
-                      } else {
-                        const newSel = [...selectedAccounts, acc];
-                        setSelectedAccounts(newSel.length === accounts.length ? [] : newSel);
-                      }
-                    }}
-                  />
-                  {acc}
-                </label>
-              ))}
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
         <select
