@@ -179,7 +179,13 @@ export default function TransactionList({
       </div>
 
       <div className="max-h-[360px] overflow-y-auto">
-        <table className="w-full text-xs">
+        <table className="w-full text-xs table-fixed">
+          <colgroup>
+            <col className="w-[60px]" />
+            <col className="w-[120px]" />
+            <col className="w-[90px]" />
+            <col className="w-[70px]" />
+          </colgroup>
           <thead className="sticky top-0 bg-white">
             <tr className="border-b border-neutral-200">
               <th
@@ -212,7 +218,7 @@ export default function TransactionList({
             {filteredTransactions.map((t) => (
               <tr key={t.id} className="border-b border-neutral-100 hover:bg-neutral-50">
                 <td className="py-2 text-neutral-500">{formatDate(t.date)}</td>
-                <td className="py-2 truncate max-w-[150px]">{t.merchant}</td>
+                <td className="py-2 truncate">{t.merchant}</td>
                 <td className="py-2">
                   <span className="inline-block px-1.5 py-0.5 bg-neutral-100 text-neutral-600 text-[10px]">
                     {t.category}
