@@ -124,8 +124,7 @@ export default function Dashboard({ transactions }: DashboardProps) {
     .filter((c) => c !== 'income' && c !== 'transfer')
     .sort();
   const accounts = [...new Set(filteredTransactions.map((t) => t.account))].sort();
-  const owners = [...new Set(filteredTransactions.map((t) => t.owner).filter(Boolean))].sort();
-
+  
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -224,7 +223,6 @@ export default function Dashboard({ transactions }: DashboardProps) {
             transactions={showIncomeView ? incomeTransactions : categoryFilteredTransactions}
             categories={showIncomeView ? [] : [...new Set(categoryFilteredTransactions.map((t) => t.category))].sort()}
             accounts={accounts}
-            owners={owners}
             selectedCategory={showIncomeView ? null : selectedCategory}
             onCategoryChange={setSelectedCategory}
             title={showIncomeView ? 'Income' : 'Transactions'}

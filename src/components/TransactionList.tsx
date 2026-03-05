@@ -7,7 +7,6 @@ interface TransactionListProps {
   transactions: Transaction[];
   categories: string[];
   accounts: string[];
-  owners: string[];
   selectedCategory: string | null;
   onCategoryChange: (category: string | null) => void;
   title?: string;
@@ -18,19 +17,21 @@ export default function TransactionList({
   transactions,
   categories,
   accounts,
-  owners,
   selectedCategory,
   onCategoryChange,
   title = 'Transactions',
   defaultTypeFilter = 'spending',
 }: TransactionListProps) {
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [accountFilter, setAccountFilter] = useState<string>('all');
-  const [ownerFilter, setOwnerFilter] = useState<string>('all');
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+  const [excludedCategories, setExcludedCategories] = useState<string[]>([]);
   const [recurringFilter, setRecurringFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>(defaultTypeFilter);
   const [sortColumn, setSortColumn] = useState<'date' | 'merchant' | 'category' | 'amount'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  const [showExcludeDropdown, setShowExcludeDropdown] = useState(false);
+
   useEffect(() => {
     setTypeFilter(defaultTypeFilter);
   }, [defaultTypeFilter]);
@@ -66,8 +67,8 @@ export default function TransactionList({
         return false;
       }
       if (selectedCategory && t.category !== selectedCategory) return false;
-      if (accountFilter !== 'all' && t.account !== accountFilter) return false;
-      if (ownerFilter !== 'all' && t.owner !== ownerFilter) return false;
+      if (excludedCategories.length > 0 && excludedCategories.includes(t.category)) return false;
+      if (selectedAccounts.length > 0 && !selectedAccounts.includes(t.account)) return false;
       if (recurringFilter !== 'all' && t.recurring !== recurringFilter) return false;
       // Type filter
       if (typeFilter === 'spending' && (t.category === 'income' || t.category === 'transfer')) return false;
@@ -89,7 +90,7 @@ export default function TransactionList({
       }
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-  }, [transactions, searchQuery, selectedCategory, accountFilter, ownerFilter, recurringFilter, typeFilter, sortColumn, sortDirection]);
+  }, [transactions, searchQuery, selectedCategory, excludedCategories, selectedAccounts, recurringFilter, typeFilter, sortColumn, sortDirection]);
 
   const total = useMemo(() => {
     return filteredTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
@@ -102,47 +103,65 @@ export default function TransactionList({
       </h2>
 
       <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto">
-        <select
-          value={selectedCategory || 'all'}
-          onChange={(e) => {
-            const val = e.target.value;
-            onCategoryChange(val === 'all' ? null : val);
-          }}
-          className="text-xs border border-neutral-200 px-2 py-1 bg-white"
-        >
-          <option value="all">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <button
+            onClick={() => setShowExcludeDropdown(!showExcludeDropdown)}
+            className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
+          >
+            Exclude {excludedCategories.length > 0 && `(${excludedCategories.length})`}
+            <span className="text-[10px]">▼</span>
+          </button>
+          {showExcludeDropdown && (
+            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-10 max-h-48 overflow-y-auto">
+              {categories.map((cat) => (
+                <label key={cat} className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    checked={excludedCategories.includes(cat)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setExcludedCategories([...excludedCategories, cat]);
+                      } else {
+                        setExcludedCategories(excludedCategories.filter((c) => c !== cat));
+                      }
+                    }}
+                  />
+                  {cat}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
 
-        <select
-          value={accountFilter}
-          onChange={(e) => setAccountFilter(e.target.value)}
-          className="text-xs border border-neutral-200 px-2 py-1 bg-white max-w-[140px]"
-        >
-          <option value="all">All Accounts</option>
-          {accounts.map((acc) => (
-            <option key={acc} value={acc}>
-              {acc}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={ownerFilter}
-          onChange={(e) => setOwnerFilter(e.target.value)}
-          className="text-xs border border-neutral-200 px-2 py-1 bg-white"
-        >
-          <option value="all">All Owners</option>
-          {owners.map((owner) => (
-            <option key={owner} value={owner}>
-              {owner}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <button
+            onClick={() => setShowAccountDropdown(!showAccountDropdown)}
+            className="text-xs border border-neutral-200 px-2 py-1 bg-white flex items-center gap-1"
+          >
+            Accounts {selectedAccounts.length > 0 && `(${selectedAccounts.length})`}
+            <span className="text-[10px]">▼</span>
+          </button>
+          {showAccountDropdown && (
+            <div className="absolute top-full left-0 mt-1 bg-white border border-neutral-200 shadow-lg z-10 max-h-48 overflow-y-auto">
+              {accounts.map((acc) => (
+                <label key={acc} className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-50 cursor-pointer text-xs whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    checked={selectedAccounts.includes(acc)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedAccounts([...selectedAccounts, acc]);
+                      } else {
+                        setSelectedAccounts(selectedAccounts.filter((a) => a !== acc));
+                      }
+                    }}
+                  />
+                  {acc}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
 
         <select
           value={recurringFilter}
