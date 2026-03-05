@@ -12,5 +12,6 @@ export interface Transaction {
   amount: number;
   category: string;
   account: string;
-  recurring: 'no' | 'weekly' | 'monthly' | 'yearly';
+  owner: string;
+  recurring: 'no' | 'weekly' | 'every 2 weeks' | 'monthly' | 'yearly';
 }

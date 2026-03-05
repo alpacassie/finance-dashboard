@@ -7,16 +7,27 @@ interface TransactionListProps {
   transactions: Transaction[];
   categories: string[];
   accounts: string[];
+  owners: string[];
+  selectedCategory: string | null;
+  onCategoryChange: (category: string | null) => void;
+  title?: string;
 }
 
 export default function TransactionList({
   transactions,
   categories,
   accounts,
+  owners,
+  selectedCategory,
+  onCategoryChange,
+  title = 'Transactions',
 }: TransactionListProps) {
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [accountFilter, setAccountFilter] = useState<string>('all');
+  const [ownerFilter, setOwnerFilter] = useState<string>('all');
   const [recurringFilter, setRecurringFilter] = useState<string>('all');
+  const [sortColumn, setSortColumn] = useState<'date' | 'merchant' | 'category' | 'amount'>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -33,25 +44,60 @@ export default function TransactionList({
     });
   };
 
+  const handleSort = (column: 'date' | 'merchant' | 'category' | 'amount') => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection(column === 'date' ? 'desc' : 'asc');
+    }
+  };
+
   const filteredTransactions = useMemo(() => {
-    return transactions.filter((t) => {
-      if (categoryFilter !== 'all' && t.category !== categoryFilter) return false;
+    const query = searchQuery.toLowerCase().trim();
+    const filtered = transactions.filter((t) => {
+      if (query && !t.merchant.toLowerCase().includes(query) && !t.category.toLowerCase().includes(query)) {
+        return false;
+      }
+      if (selectedCategory && t.category !== selectedCategory) return false;
       if (accountFilter !== 'all' && t.account !== accountFilter) return false;
+      if (ownerFilter !== 'all' && t.owner !== ownerFilter) return false;
       if (recurringFilter !== 'all' && t.recurring !== recurringFilter) return false;
       return true;
     });
-  }, [transactions, categoryFilter, accountFilter, recurringFilter]);
+
+    return filtered.sort((a, b) => {
+      let comparison = 0;
+      if (sortColumn === 'date') {
+        comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+      } else if (sortColumn === 'merchant') {
+        comparison = a.merchant.localeCompare(b.merchant);
+      } else if (sortColumn === 'category') {
+        comparison = a.category.localeCompare(b.category);
+      } else if (sortColumn === 'amount') {
+        comparison = a.amount - b.amount;
+      }
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }, [transactions, searchQuery, selectedCategory, accountFilter, ownerFilter, recurringFilter, sortColumn, sortDirection]);
+
+  const total = useMemo(() => {
+    return filteredTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  }, [filteredTransactions]);
 
   return (
     <div className="border border-neutral-200 p-4">
       <h2 className="text-xs text-neutral-500 uppercase tracking-wide mb-4">
-        Transactions
+        {title}
       </h2>
 
-      <div className="flex gap-2 mb-4 flex-wrap">
+      <div className="flex gap-2 mb-4 flex-nowrap overflow-x-auto">
         <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
+          value={selectedCategory || 'all'}
+          onChange={(e) => {
+            const val = e.target.value;
+            onCategoryChange(val === 'all' ? null : val);
+          }}
           className="text-xs border border-neutral-200 px-2 py-1 bg-white"
         >
           <option value="all">All Categories</option>
@@ -65,12 +111,25 @@ export default function TransactionList({
         <select
           value={accountFilter}
           onChange={(e) => setAccountFilter(e.target.value)}
-          className="text-xs border border-neutral-200 px-2 py-1 bg-white"
+          className="text-xs border border-neutral-200 px-2 py-1 bg-white max-w-[180px]"
         >
           <option value="all">All Accounts</option>
           {accounts.map((acc) => (
             <option key={acc} value={acc}>
               {acc}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={ownerFilter}
+          onChange={(e) => setOwnerFilter(e.target.value)}
+          className="text-xs border border-neutral-200 px-2 py-1 bg-white"
+        >
+          <option value="all">All Owners</option>
+          {owners.map((owner) => (
+            <option key={owner} value={owner}>
+              {owner}
             </option>
           ))}
         </select>
@@ -83,19 +142,48 @@ export default function TransactionList({
           <option value="all">All Types</option>
           <option value="no">One-time</option>
           <option value="weekly">Weekly</option>
+          <option value="every 2 weeks">Every 2 weeks</option>
           <option value="monthly">Monthly</option>
           <option value="yearly">Yearly</option>
         </select>
+
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="text-xs border border-neutral-200 px-2 py-1 bg-white w-32"
+        />
       </div>
 
-      <div className="max-h-80 overflow-y-auto">
+      <div className="max-h-[420px] overflow-y-auto">
         <table className="w-full text-xs">
           <thead className="sticky top-0 bg-white">
             <tr className="border-b border-neutral-200">
-              <th className="text-left py-2 font-medium text-neutral-500">Date</th>
-              <th className="text-left py-2 font-medium text-neutral-500">Merchant</th>
-              <th className="text-left py-2 font-medium text-neutral-500">Category</th>
-              <th className="text-right py-2 font-medium text-neutral-500">Amount</th>
+              <th
+                className="text-left py-2 font-medium text-neutral-500 cursor-pointer hover:text-neutral-700"
+                onClick={() => handleSort('date')}
+              >
+                Date {sortColumn === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
+              </th>
+              <th
+                className="text-left py-2 font-medium text-neutral-500 cursor-pointer hover:text-neutral-700"
+                onClick={() => handleSort('merchant')}
+              >
+                Merchant {sortColumn === 'merchant' && (sortDirection === 'asc' ? '↑' : '↓')}
+              </th>
+              <th
+                className="text-left py-2 font-medium text-neutral-500 cursor-pointer hover:text-neutral-700"
+                onClick={() => handleSort('category')}
+              >
+                Category {sortColumn === 'category' && (sortDirection === 'asc' ? '↑' : '↓')}
+              </th>
+              <th
+                className="text-right py-2 font-medium text-neutral-500 cursor-pointer hover:text-neutral-700"
+                onClick={() => handleSort('amount')}
+              >
+                Amount {sortColumn === 'amount' && (sortDirection === 'asc' ? '↑' : '↓')}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -117,9 +205,14 @@ export default function TransactionList({
         </table>
       </div>
 
-      <p className="text-xs text-neutral-400 mt-3">
-        Showing {filteredTransactions.length} of {transactions.length} transactions
-      </p>
+      <div className="flex justify-between items-center mt-3 pt-3 border-t border-neutral-200">
+        <p className="text-xs text-neutral-400">
+          Showing {filteredTransactions.length} of {transactions.length} transactions
+        </p>
+        <p className="text-sm font-semibold">
+          Total: {formatCurrency(total)}
+        </p>
+      </div>
     </div>
   );
 }

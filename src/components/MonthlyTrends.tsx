@@ -17,9 +17,10 @@ interface MonthlyData {
 
 interface MonthlyTrendsProps {
   data: MonthlyData[];
+  selectedCategory: string | null;
 }
 
-export default function MonthlyTrends({ data }: MonthlyTrendsProps) {
+export default function MonthlyTrends({ data, selectedCategory }: MonthlyTrendsProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -31,9 +32,16 @@ export default function MonthlyTrends({ data }: MonthlyTrendsProps) {
 
   return (
     <div className="border border-neutral-200 p-4">
-      <h2 className="text-xs text-neutral-500 uppercase tracking-wide mb-4">
-        Monthly Spending Trends
-      </h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xs text-neutral-500 uppercase tracking-wide">
+          Monthly Spending Trends
+        </h2>
+        {selectedCategory && (
+          <span className="text-xs text-neutral-500">
+            Filtering: <span className="font-medium">{selectedCategory}</span>
+          </span>
+        )}
+      </div>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>

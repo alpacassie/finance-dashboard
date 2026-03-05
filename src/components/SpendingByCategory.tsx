@@ -1,6 +1,6 @@
 'use client';
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 'recharts';
 
 interface CategoryData {
   category: string;
@@ -9,15 +9,15 @@ interface CategoryData {
 
 interface SpendingByCategoryProps {
   data: CategoryData[];
+  selectedCategory: string | null;
+  onCategoryClick: (category: string) => void;
 }
 
-const COLORS = [
-  '#000000', '#404040', '#737373', '#a3a3a3', '#d4d4d4',
-  '#525252', '#171717', '#262626', '#e5e5e5', '#f5f5f5',
-  '#6b7280', '#374151', '#1f2937'
-];
-
-export default function SpendingByCategory({ data }: SpendingByCategoryProps) {
+export default function SpendingByCategory({
+  data,
+  selectedCategory,
+  onCategoryClick,
+}: SpendingByCategoryProps) {
   const total = data.reduce((sum, item) => sum + item.amount, 0);
 
   const formatCurrency = (value: number) => {
@@ -29,47 +29,76 @@ export default function SpendingByCategory({ data }: SpendingByCategoryProps) {
     }).format(value);
   };
 
+  // Dynamic height based on number of categories
+  const chartHeight = Math.max(200, data.length * 28);
+
   return (
     <div className="border border-neutral-200 p-4">
-      <h2 className="text-xs text-neutral-500 uppercase tracking-wide mb-4">
-        Spending by Category
-      </h2>
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              dataKey="amount"
-              nameKey="category"
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={80}
-              paddingAngle={1}
-            >
-              {data.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip
-              formatter={(value) => formatCurrency(Number(value))}
-              contentStyle={{
-                fontFamily: 'var(--font-ibm-plex-mono), monospace',
-                fontSize: '12px',
-                border: '1px solid #e5e5e5',
-                borderRadius: 0,
-              }}
-            />
-            <Legend
-              formatter={(value) => <span className="text-xs">{value}</span>}
-              wrapperStyle={{ fontSize: '10px' }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xs text-neutral-500 uppercase tracking-wide">
+          Spending by Category
+        </h2>
+        <span className="text-sm font-semibold">{formatCurrency(total)}</span>
       </div>
-      <p className="text-center text-sm text-neutral-500 mt-2">
-        Total: {formatCurrency(total)}
-      </p>
+      <div style={{ height: chartHeight }} className="outline-none [&_*]:outline-none">
+          <ResponsiveContainer width="100%" height="100%" style={{ outline: 'none' }}>
+            <BarChart
+              data={data}
+              layout="vertical"
+              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+            >
+              <XAxis type="number" hide />
+              <YAxis
+                type="category"
+                dataKey="category"
+                width={80}
+                tick={{ fontSize: 11, fill: '#737373' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                formatter={(value) => formatCurrency(Number(value))}
+                contentStyle={{
+                  fontFamily: 'var(--font-ibm-plex-mono), monospace',
+                  fontSize: '12px',
+                  border: '1px solid #e5e5e5',
+                  borderRadius: 0,
+                }}
+                cursor={{ fill: '#f5f5f5' }}
+              />
+              <Bar
+                dataKey="amount"
+                radius={[0, 2, 2, 0]}
+                cursor="pointer"
+                onClick={(data) => {
+                  if (data?.category) {
+                    onCategoryClick(data.category);
+                  }
+                }}
+              >
+                {data.map((entry) => (
+                  <Cell
+                    key={`cell-${entry.category}`}
+                    fill={
+                      selectedCategory === null
+                        ? entry.category === data[0]?.category
+                          ? '#000000'
+                          : '#a3a3a3'
+                        : entry.category === selectedCategory
+                        ? '#000000'
+                        : '#e5e5e5'
+                    }
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+      </div>
+      {selectedCategory && (
+        <p className="text-xs text-neutral-500 mt-2">
+          Filtering by: <span className="font-medium">{selectedCategory}</span>
+        </p>
+      )}
     </div>
   );
 }
