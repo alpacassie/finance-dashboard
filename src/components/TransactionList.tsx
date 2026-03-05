@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Transaction } from '@/lib/supabase';
 
 interface TransactionListProps {
@@ -31,6 +31,10 @@ export default function TransactionList({
   const [typeFilter, setTypeFilter] = useState<string>(defaultTypeFilter);
   const [sortColumn, setSortColumn] = useState<'date' | 'merchant' | 'category' | 'amount'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  useEffect(() => {
+    setTypeFilter(defaultTypeFilter);
+  }, [defaultTypeFilter]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
